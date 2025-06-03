@@ -1,315 +1,225 @@
 # Fast Readability
 
-A Python library that uses QuickJS to call Mozilla's readability.js, implementing all its functionality for extracting readable content from HTML documents.
+一个基于 Mozilla Readability.js 的快速 HTML 内容提取器，用于从网页中提取干净的文章内容。
 
-[![PyPI version](https://badge.fury.io/py/fast-readability.svg)](https://badge.fury.io/py/fast-readability)
-[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+## 特性
 
-## Features
+- 🚀 **快速**: 基于 JavaScript 引擎的高性能内容提取
+- 🧹 **干净**: 自动移除广告、导航栏、侧边栏等无关内容
+- 🌐 **多语言**: 支持多种语言的网页内容提取
+- 📱 **易用**: 简单的 Python API，支持 HTML 字符串和 URL
+- 🔧 **可配置**: 支持自定义请求头、超时等参数
 
-- 🚀 **Fast**: Uses QuickJS for JavaScript execution with minimal overhead
-- 🔧 **Complete**: Implements all features of Mozilla's readability.js
-- 🐍 **Pythonic**: Clean Python API with type hints and comprehensive documentation
-- 🛠️ **Flexible**: Supports custom parsing options and configurations
-- 📦 **Zero Dependencies**: Only requires QuickJS Python binding
-- 🌐 **URL Support**: Can fetch and parse content directly from URLs
-- 🖥️ **CLI Tool**: Includes command-line interface for easy integration
-
-## Installation
+## 安装
 
 ```bash
 pip install fast-readability
 ```
 
-## Quick Start
+或者从源码安装：
 
-### Basic Usage
+```bash
+git clone https://github.com/jiankaiwang/fast-readability.git
+cd fast-readability
+pip install -e .
+```
+
+## 快速开始
+
+### 从 URL 提取内容
 
 ```python
 from fast_readability import Readability
 
-# Parse HTML content
+# 创建提取器实例
+reader = Readability()
+
+# 从 URL 提取内容
+url = "https://example.com/article"
+result = reader.extract_from_url(url)
+
+print("标题:", result["title"])
+print("正文:", result["textContent"])
+print("HTML内容:", result["content"])
+```
+
+### 从 HTML 字符串提取内容
+
+```python
+from fast_readability import Readability
+
+# HTML 内容
 html = """
 <html>
-<head><title>Example Article</title></head>
+<head><title>示例文章</title></head>
 <body>
     <article>
-        <h1>How to Use Fast-Readability</h1>
-        <p>This is an example article with readable content.</p>
-        <p>The library extracts clean, readable text from HTML.</p>
+        <h1>这是标题</h1>
+        <p>这是文章的正文内容...</p>
     </article>
+    <aside>这是侧边栏，会被过滤掉</aside>
 </body>
 </html>
 """
 
-with Readability() as reader:
-    result = reader.parse(html, "https://example.com")
-    
-    print(f"Title: {result.title}")
-    print(f"Content: {result.text_content}")
-    print(f"Length: {result.length} characters")
+reader = Readability()
+result = reader.extract_from_html(html)
+
+print("标题:", result["title"])
+print("正文:", result["textContent"])
 ```
 
-### Using Utility Functions
+### 便捷函数
 
 ```python
-from fast_readability.utils import parse_html, is_probably_readerable
+from fast_readability import extract_content, extract_from_url
 
-# Quick parsing
-result = parse_html(html, "https://example.com")
+# 直接从 HTML 提取
+result = extract_content(html)
 
-# Check if content is readerable
-if is_probably_readerable(html):
-    print("Content is probably readerable")
+# 直接从 URL 提取
+result = extract_from_url("https://example.com/article")
 ```
 
-### Parsing from URL
+## API 参考
 
-```python
-from fast_readability.utils import parse_from_url
+### Readability 类
 
-# Parse directly from URL
-result = parse_from_url("https://example.com/article")
-print(f"Title: {result.title}")
-print(f"Author: {result.byline}")
-```
+#### `__init__(debug=False)`
 
-## API Reference
+创建 Readability 实例。
 
-### Readability Class
+- `debug` (bool): 是否启用调试模式
 
-The main `Readability` class provides the core functionality:
+#### `extract_from_html(html)`
 
-```python
-class Readability:
-    def __init__(self, memory_limit: int = 50*1024*1024, time_limit: int = 10):
-        """
-        Initialize Readability with resource limits.
-        
-        Args:
-            memory_limit: Memory limit in bytes (default: 50MB)
-            time_limit: Time limit in seconds (default: 10s)
-        """
-    
-    def parse(self, html_content: str, url: str = "", options: dict = None) -> ReadabilityResult:
-        """Parse HTML content and extract readable content."""
-    
-    def is_probably_readerable(self, html_content: str, url: str = "", options: dict = None) -> bool:
-        """Check if content is probably readerable."""
-    
-    def parse_from_url(self, url: str, options: dict = None, **kwargs) -> ReadabilityResult:
-        """Fetch and parse content from URL."""
-```
+从 HTML 字符串提取内容。
 
-### ReadabilityResult
+- `html` (str): HTML 字符串
 
-The result object contains all extracted information:
+返回包含以下字段的字典：
+- `title`: 文章标题
+- `content`: HTML 格式的文章内容
+- `textContent`: 纯文本格式的文章内容
+- `length`: 内容长度
+- `excerpt`: 文章摘要
+- `byline`: 作者信息
+- `dir`: 文本方向
+- `siteName`: 网站名称
+- `lang`: 语言
 
-```python
-@dataclass
-class ReadabilityResult:
-    title: Optional[str]           # Article title
-    content: Optional[str]         # HTML content
-    text_content: Optional[str]    # Text content (no HTML)
-    length: Optional[int]          # Content length in characters
-    excerpt: Optional[str]         # Article excerpt
-    byline: Optional[str]          # Author information
-    dir: Optional[str]             # Text direction
-    site_name: Optional[str]       # Site name
-    lang: Optional[str]            # Content language
-    published_time: Optional[str]  # Publication time
-```
+#### `extract_from_url(url, headers=None, timeout=30, verify_ssl=True)`
 
-### Custom Options
+从 URL 提取内容。
 
-You can customize the parsing behavior:
+- `url` (str): 要提取的 URL
+- `headers` (dict, optional): 自定义请求头
+- `timeout` (int): 请求超时时间（秒）
+- `verify_ssl` (bool): 是否验证 SSL 证书
 
-```python
-from fast_readability.utils import create_custom_options
+#### `get_text_content(html)`
 
-options = create_custom_options(
-    char_threshold=300,           # Minimum characters for article
-    keep_classes=True,            # Preserve CSS classes
-    classes_to_preserve=["highlight", "code"],  # Specific classes to keep
-    max_elems_to_parse=1000,      # Limit elements to process
-    debug=True                    # Enable debug output
-)
+获取纯文本内容。
 
-result = parse_html(html, options=options)
-```
+#### `get_title(html)`
 
-## Command Line Interface
+获取文章标题。
 
-Fast-readability includes a CLI tool:
+#### `is_probably_readable(html, min_content_length=140)`
 
-```bash
-# Parse HTML file
-fast-readability article.html
+检查 HTML 是否包含可读内容。
 
-# Parse from URL
-fast-readability --url https://example.com/article
+### 便捷函数
 
-# Parse from stdin
-curl https://example.com/article | fast-readability --stdin
+#### `extract_content(html, debug=False)`
 
-# Check if content is readerable
-fast-readability --check article.html
+从 HTML 提取内容的便捷函数。
 
-# Output only text content
-fast-readability --text-only article.html
+#### `extract_from_url(url, debug=False, **kwargs)`
 
-# Output as JSON
-fast-readability --json article.html
+从 URL 提取内容的便捷函数。
 
-# Custom options
-fast-readability --char-threshold 100 --keep-classes article.html
-```
+## 使用示例
 
-### CLI Options
-
-```
-usage: fast-readability [-h] [--url URL | --stdin] [--check] [--json] 
-                        [--text-only] [--title-only] [--output OUTPUT]
-                        [--char-threshold CHAR_THRESHOLD] [--keep-classes]
-                        [--max-elems MAX_ELEMS] [--debug]
-                        [--memory-limit MEMORY_LIMIT] [--time-limit TIME_LIMIT]
-                        [file]
-
-Extract readable content from HTML using Mozilla's readability.js
-
-positional arguments:
-  file                  HTML file to parse
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --url URL             URL to fetch and parse
-  --stdin               Read HTML from stdin
-  --check               Only check if content is readerable
-  --json                Output results as JSON
-  --text-only           Output only the text content
-  --title-only          Output only the title
-  --output OUTPUT, -o OUTPUT
-                        Output file (default: stdout)
-  --char-threshold CHAR_THRESHOLD
-                        Minimum characters for article (default: 500)
-  --keep-classes        Preserve CSS classes in output
-  --max-elems MAX_ELEMS
-                        Maximum elements to parse (0 = no limit)
-  --debug               Enable debug output
-  --memory-limit MEMORY_LIMIT
-                        Memory limit in MB (default: 50)
-  --time-limit TIME_LIMIT
-                        Time limit in seconds (default: 10)
-```
-
-## Advanced Usage
-
-### Context Manager
-
-Use Readability as a context manager for automatic resource cleanup:
-
-```python
-with Readability(memory_limit=25*1024*1024, time_limit=5) as reader:
-    if reader.is_probably_readerable(html):
-        result = reader.parse(html)
-        print(result.title)
-```
-
-### Error Handling
-
-```python
-from fast_readability import ReadabilityError
-
-try:
-    result = parse_html(html)
-except ReadabilityError as e:
-    print(f"Failed to parse content: {e}")
-```
-
-### Batch Processing
+### 处理不同类型的网站
 
 ```python
 from fast_readability import Readability
 
-urls = ["https://example.com/1", "https://example.com/2"]
+reader = Readability(debug=True)
 
-with Readability() as reader:
-    for url in urls:
-        try:
-            result = reader.parse_from_url(url)
-            print(f"Processed: {result.title}")
-        except ReadabilityError as e:
-            print(f"Failed to process {url}: {e}")
+# 新闻网站
+news_result = reader.extract_from_url("https://news.example.com/article")
+
+# 博客文章
+blog_result = reader.extract_from_url("https://blog.example.com/post")
+
+# 技术文档
+doc_result = reader.extract_from_url("https://docs.example.com/guide")
 ```
 
-## Performance Considerations
+### 自定义请求参数
 
-- **Memory Usage**: Default memory limit is 50MB. Adjust based on your needs.
-- **Time Limits**: Default timeout is 10 seconds. Increase for complex documents.
-- **Reuse Instances**: Reuse Readability instances when processing multiple documents.
-- **Context Managers**: Use context managers for automatic cleanup.
+```python
+from fast_readability import Readability
 
-## Comparison with Other Libraries
+reader = Readability()
 
-| Feature | fast-readability | python-readability | newspaper3k |
-|---------|------------------|-------------------|-------------|
-| JavaScript Engine | QuickJS | None | None |
-| Mozilla Algorithm | ✅ Full | ❌ Python port | ❌ Different |
-| Performance | ⚡ Fast | 🐌 Slow | ⚡ Fast |
-| Accuracy | 🎯 High | 📊 Medium | 📊 Medium |
-| Maintenance | 🔄 Active | ⏸️ Stale | 🔄 Active |
+# 自定义请求头
+headers = {
+    'User-Agent': 'MyBot/1.0',
+    'Accept-Language': 'zh-CN,zh;q=0.9'
+}
 
-## Requirements
+result = reader.extract_from_url(
+    "https://example.com/article",
+    headers=headers,
+    timeout=60,
+    verify_ssl=False
+)
+```
+
+### 批量处理
+
+```python
+from fast_readability import Readability
+
+urls = [
+    "https://example1.com/article",
+    "https://example2.com/article",
+    "https://example3.com/article"
+]
+
+reader = Readability()
+
+for url in urls:
+    try:
+        result = reader.extract_from_url(url)
+        print(f"Title: {result['title']}")
+        print(f"Length: {result['length']} chars")
+        print("-" * 50)
+    except Exception as e:
+        print(f"Failed to extract {url}: {e}")
+```
+
+## 依赖项
 
 - Python 3.7+
-- QuickJS Python binding
-- Requests (for URL fetching)
+- quickjs
+- beautifulsoup4
+- requests
+- urllib3
 
-## Contributing
+## 许可证
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+本项目基于 Mozilla Public License 2.0 许可证。
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 贡献
 
-## Development
+欢迎提交 Issues 和 Pull Requests！
 
-```bash
-# Clone repository
-git clone https://github.com/darkqiank/fast-readability.git
-cd fast-readability
+## 致谢
 
-# Install development dependencies
-pip install -e ".[dev]"
-
-# Run tests
-pytest
-
-# Run linting
-black .
-isort .
-flake8
-```
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Mozilla's [readability.js](https://github.com/mozilla/readability) for the core algorithm
-- [QuickJS](https://bellard.org/quickjs/) JavaScript engine
-- Firefox Reader View team for the original implementation
-
-## Changelog
-
-### v0.1.0
-- Initial release
-- Full implementation of Mozilla's readability.js
-- Command-line interface
-- Python 3.7+ support
-- Comprehensive test suite
+本项目基于以下开源项目：
+- [Mozilla Readability.js](https://github.com/mozilla/readability) - 核心内容提取算法
+- [JSDOMParser](https://github.com/mozilla/readability/blob/main/JSDOMParser.js) - JavaScript DOM 解析器 

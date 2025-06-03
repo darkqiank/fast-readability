@@ -5,17 +5,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fast-readability"
 version = "0.1.0"
-description = "A Python library that uses QuickJS to call Mozilla's readability.js, implementing all its functionality"
+description = "A fast HTML content extractor based on Mozilla's Readability.js"
 authors = [
     {name = "darkqiank", email = "darkqiank@gmail.com"}
 ]
 readme = "README.md"
-license = {text = "Apache-2.0"}
+license = {text = "MPL-2.0"}
 requires-python = ">=3.7"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
@@ -26,35 +27,39 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Text Processing :: Markup :: HTML",
     "Topic :: Internet :: WWW/HTTP :: Browsers",
+    "Topic :: Text Processing :: Filters",
 ]
-keywords = ["readability", "javascript", "quickjs", "mozilla", "html", "text-extraction"]
-
+keywords = ["readability", "html", "content-extraction", "web-scraping", "text-processing"]
 dependencies = [
-    "quickjs>=1.19.2",
+    "quickjs>=1.15.0",
+    "beautifulsoup4>=4.9.0",
     "requests>=2.25.0",
+    "urllib3>=1.26.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=6.0",
-    "pytest-cov>=2.0",
-    "black>=21.0.0",
-    "isort>=5.0.0",
-    "flake8>=3.8.0",
-    "mypy>=0.800",
+    "black>=22.0",
+    "flake8>=4.0",
+    "mypy>=0.900",
+    "pre-commit>=2.0",
+]
+test = [
+    "pytest>=6.0",
+    "pytest-cov>=3.0",
+    "requests-mock>=1.9.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/darkqiank/fast-readability"
-Repository = "https://github.com/darkqiank/fast-readability"
-Issues = "https://github.com/darkqiank/fast-readability/issues"
+Repository = "https://github.com/darkqiank/fast-readability.git"
+"Bug Tracker" = "https://github.com/darkqiank/fast-readability/issues"
+Documentation = "https://github.com/darkqiank/fast-readability#readme"
 
-[project.scripts]
-fast-readability = "fast_readability.cli:main"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["fast_readability*"]
+[tool.setuptools]
+packages = ["fast_readability"]
+include-package-data = true
 
 [tool.setuptools.package-data]
 fast_readability = ["js/*.js"]
@@ -62,13 +67,74 @@ fast_readability = ["js/*.js"]
 [tool.black]
 line-length = 88
 target-version = ['py37']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [".git", "__pycache__", "build", "dist", ".venv"]
 
 [tool.mypy]
 python_version = "3.7"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true 
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "quickjs",
+    "bs4.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+source = ["fast_readability"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+] 

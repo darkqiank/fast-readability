@@ -155,7 +155,7 @@ cython_debug/
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be added to the global gitignore or merged into this project gitignore.  For a PyCharm
-#  project, it is recommended to include the directory-based .idea directory.
+#  project, it is recommended to include directory-based settings.
 .idea/
 
 # VS Code
@@ -185,6 +185,20 @@ tramp
 .DS_Store
 .AppleDouble
 .LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
 
 # Windows
 Thumbs.db
@@ -193,70 +207,74 @@ ehthumbs.db
 ehthumbs_vista.db
 *.tmp
 *.temp
+*.lnk
 Desktop.ini
 $RECYCLE.BIN/
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
-*.lnk
 
 # Linux
 *~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Project specific
+# Logs
+*.log
+
+# Local development
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Backup files
+*.bak
+*.backup
+*.old
 
 # Temporary files
 *.tmp
 *.temp
-*.bak
-*.swp
-*.log
 
-# Project specific
-debug_js.py
-debug_js2.py
-test_basic.py
-test_article.html
-
-# Build artifacts
-*.whl
+# Archive files
+*.zip
 *.tar.gz
+*.rar
 
-# Local development files
-local_test.py
-scratch.py
-playground.py
+# Database files
+*.db
+*.sqlite
+*.sqlite3
 
-# Coverage reports
-.coverage
-htmlcov/
+# Configuration files with sensitive data
+config.ini
+settings.ini
+secrets.json
 
-# Pytest
-.pytest_cache/
-
-# Bandit security linter
-.bandit
-
-# Safety dependency checker
-safety-report.json
-
-# Local configuration files
-local_config.py
-config_local.py
-
-# Documentation build
-docs/_build/
-docs/build/
-
-# Jupyter notebooks checkpoints
-.ipynb_checkpoints/
-
-# Node.js (if using any JS tooling)
+# Node.js (if any frontend assets)
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Package lock files (optional, depending on preference)
-# package-lock.json
-# yarn.lock 
+# Terraform (if used for deployment)
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Docker
+.dockerignore
+
+# Pre-commit
+.pre-commit-config.yaml
+
+# Benchmark results
+benchmarks/
+
+# Profiling data
+*.prof
+
+# Local scripts
+local_*
+test_local_* 

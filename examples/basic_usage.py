@@ -1,191 +1,156 @@
 #!/usr/bin/env python3
 """
-Basic usage examples for fast-readability library
+Fast Readability 基本使用示例
 """
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from fast_readability import Readability, ReadabilityResult
-from fast_readability.utils import (
-    is_probably_readerable, 
-    parse_html, 
-    parse_from_url,
-    create_custom_options
-)
+# 添加父目录到路径，以便导入包
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+from fast_readability import Readability, extract_content, extract_from_url
 
 
-def example_basic_parsing():
-    """Example of basic HTML parsing"""
-    print("=== Basic HTML Parsing ===")
+def demo_html_extraction():
+    """演示从HTML字符串提取内容"""
+    print("=== HTML字符串提取示例 ===")
     
-    html_content = """
+    html = """
     <html>
     <head>
-        <title>Example Article</title>
-        <meta name="author" content="John Doe">
+        <title>示例文章</title>
+        <meta charset="utf-8">
     </head>
     <body>
         <header>
-            <nav>Navigation menu</nav>
+            <nav>导航栏 - 这部分会被过滤</nav>
         </header>
-        <main>
-            <article>
-                <h1>How to Use Fast-Readability</h1>
-                <p class="byline">By John Doe</p>
-                <p>Fast-readability is a Python library that uses QuickJS to execute Mozilla's readability.js library. This allows you to extract clean, readable content from HTML documents, just like Firefox's Reader View.</p>
-                <p>The library provides several key features including content extraction, readability checking, and customizable parsing options. It's designed to be fast, lightweight, and easy to use.</p>
-                <h2>Key Features</h2>
-                <ul>
-                    <li>Extract article title, content, and metadata</li>
-                    <li>Check if content is probably readerable</li>
-                    <li>Support for custom parsing options</li>
-                    <li>Built on Mozilla's battle-tested readability algorithm</li>
-                </ul>
-                <p>Whether you're building a content aggregator, creating a reader app, or just need to extract clean text from web pages, fast-readability provides the tools you need.</p>
-            </article>
-        </main>
+        
+        <article>
+            <h1>Python Web爬虫入门指南</h1>
+            <p class="byline">作者：张三 | 发布时间：2024-01-01</p>
+            
+            <p>Web爬虫是一种自动获取网页数据的程序。Python因其简洁的语法和丰富的库支持，成为了爬虫开发的首选语言。</p>
+            
+            <h2>什么是Web爬虫？</h2>
+            <p>Web爬虫（Web Crawler）是一种按照一定的规则，自动地抓取网络信息的程序或者脚本。它们被广泛用于搜索引擎索引、数据挖掘、监测网站变化等领域。</p>
+            
+            <h2>Python爬虫的优势</h2>
+            <ul>
+                <li>语法简洁，易于学习</li>
+                <li>有强大的第三方库支持</li>
+                <li>社区活跃，文档丰富</li>
+            </ul>
+            
+            <p>总之，Python是进行Web爬虫开发的理想选择。无论是初学者还是专业开发者，都能够快速上手并构建高效的爬虫应用。</p>
+        </article>
+        
+        <aside>
+            <h3>相关文章</h3>
+            <ul>
+                <li><a href="#">数据分析入门</a></li>
+                <li><a href="#">机器学习基础</a></li>
+            </ul>
+        </aside>
+        
         <footer>
-            <p>Copyright 2023</p>
+            <p>版权所有 © 2024 示例网站</p>
         </footer>
     </body>
     </html>
     """
     
-    # Method 1: Using the Readability class directly
-    with Readability() as reader:
-        result = reader.parse(html_content, "https://example.com")
-        
-        print(f"Title: {result.title}")
-        print(f"Author: {result.byline}")
-        print(f"Content length: {result.length} characters")
-        print(f"Excerpt: {result.excerpt}")
-        print(f"Text content preview: {result.text_content[:200]}...")
+    # 使用类方法
+    reader = Readability(debug=True)
+    result = reader.extract_from_html(html)
     
-    # Method 2: Using utility function
-    result = parse_html(html_content, "https://example.com")
-    print(f"\nUsing utility function - Title: {result.title}")
+    print(f"标题: {result['title']}")
+    print(f"作者信息: {result['byline']}")
+    print(f"内容长度: {result['length']} 字符")
+    print(f"摘要: {result['excerpt']}")
+    print("\n--- 正文内容 ---")
+    print(result['textContent'][:300] + "..." if len(result['textContent']) > 300 else result['textContent'])
+    
+    # 使用便捷函数
+    print("\n=== 使用便捷函数 ===")
+    result2 = extract_content(html)
+    print(f"便捷函数提取的标题: {result2['title']}")
 
 
-def example_readability_check():
-    """Example of checking if content is readerable"""
-    print("\n=== Readability Check ===")
+def demo_url_extraction():
+    """演示从URL提取内容"""
+    print("\n=== URL提取示例 ===")
     
-    # Good content
-    good_html = """
-    <html>
-    <body>
-        <article>
-            <h1>Comprehensive Guide to Python</h1>
-            <p>Python is a high-level, interpreted programming language with dynamic semantics. Its high-level built-in data structures, combined with dynamic typing and dynamic binding, make it very attractive for Rapid Application Development.</p>
-            <p>Python's simple, easy to learn syntax emphasizes readability and therefore reduces the cost of program maintenance. Python supports modules and packages, which encourages program modularity and code reuse.</p>
-        </article>
-    </body>
-    </html>
-    """
+    # 这里使用一个公开的示例网站
+    test_urls = [
+        "https://httpbin.org/html",  # 简单的HTML测试页面
+    ]
     
-    # Poor content
-    poor_html = """
-    <html>
-    <body>
-        <div>
-            <span>Short</span>
-            <div>Menu</div>
-            <div>Footer</div>
-        </div>
-    </body>
-    </html>
-    """
+    reader = Readability(debug=True)
     
-    print(f"Good content is readerable: {is_probably_readerable(good_html)}")
-    print(f"Poor content is readerable: {is_probably_readerable(poor_html)}")
+    for url in test_urls:
+        try:
+            print(f"\n正在提取: {url}")
+            result = reader.extract_from_url(url, timeout=10)
+            
+            print(f"标题: {result['title']}")
+            print(f"内容长度: {result['length']} 字符")
+            if result['textContent']:
+                preview = result['textContent'][:200] + "..." if len(result['textContent']) > 200 else result['textContent']
+                print(f"内容预览: {preview}")
+            else:
+                print("未提取到内容")
+                
+        except Exception as e:
+            print(f"提取失败: {e}")
 
 
-def example_custom_options():
-    """Example of using custom parsing options"""
-    print("\n=== Custom Options ===")
+def demo_utility_methods():
+    """演示实用方法"""
+    print("\n=== 实用方法示例 ===")
     
     html = """
     <html>
-    <head><title>Technical Article</title></head>
+    <head><title>测试页面</title></head>
     <body>
-        <article class="main-content">
-            <h1 class="article-title">Advanced JavaScript Concepts</h1>
-            <div class="article-meta">
-                <span class="author">Jane Smith</span>
-                <time class="published">2023-12-01</time>
-            </div>
-            <div class="article-body">
-                <p class="intro">JavaScript is a versatile programming language that powers the modern web. Understanding advanced concepts is crucial for building robust applications.</p>
-                <p class="content">This article covers closures, prototypes, async programming, and more advanced topics that every JavaScript developer should master.</p>
-            </div>
-        </article>
+        <h1>这是一个测试页面</h1>
+        <p>这里有一些内容用于测试各种实用方法。</p>
+        <p>内容应该足够长以通过可读性检查。</p>
     </body>
     </html>
     """
     
-    # Custom options to preserve CSS classes and lower character threshold
-    options = create_custom_options(
-        char_threshold=100,  # Lower threshold for shorter articles
-        keep_classes=True,   # Preserve CSS classes
-        classes_to_preserve=["article-title", "author", "content"],
-        debug=False
-    )
+    reader = Readability()
     
-    result = parse_html(html, "https://example.com", options)
+    # 获取标题
+    title = reader.get_title(html)
+    print(f"标题: {title}")
     
-    print(f"Title: {result.title}")
-    print(f"Content with classes preserved: {result.content[:300]}...")
-
-
-def example_url_parsing():
-    """Example of parsing content from a URL"""
-    print("\n=== URL Parsing (Mock Example) ===")
+    # 获取纯文本内容
+    text_content = reader.get_text_content(html)
+    print(f"纯文本: {text_content}")
     
-    # Note: This is a mock example. In real usage, you would use:
-    # result = parse_from_url("https://example.com/article")
+    # 检查是否可读
+    is_readable = reader.is_probably_readable(html)
+    print(f"是否可读: {is_readable}")
     
-    print("To parse from a URL in real usage:")
-    print("from fast_readability.utils import parse_from_url")
-    print("result = parse_from_url('https://example.com/article')")
-    print("print(result.title)")
-
-
-def example_context_manager():
-    """Example of using Readability as a context manager"""
-    print("\n=== Context Manager Usage ===")
-    
-    html = "<html><body><article><h1>Title</h1><p>Content goes here with enough text to be readable.</p></article></body></html>"
-    
-    # Using context manager for automatic resource cleanup
-    with Readability(memory_limit=25*1024*1024, time_limit=5) as reader:
-        # Check readability first
-        if reader.is_probably_readerable(html):
-            result = reader.parse(html)
-            print(f"Successfully parsed: {result.title}")
-        else:
-            print("Content is not readerable")
+    # 检查短内容
+    short_html = "<html><body><p>太短了</p></body></html>"
+    is_short_readable = reader.is_probably_readable(short_html)
+    print(f"短内容是否可读: {is_short_readable}")
 
 
 def main():
-    """Run all examples"""
-    print("Fast-Readability Library Examples")
-    print("=" * 40)
+    """主函数"""
+    print("Fast Readability 使用示例")
+    print("=" * 50)
     
-    try:
-        example_basic_parsing()
-        example_readability_check()
-        example_custom_options()
-        example_url_parsing()
-        example_context_manager()
-        
-        print("\n" + "=" * 40)
-        print("All examples completed successfully!")
-        
-    except Exception as e:
-        print(f"Error running examples: {e}")
-        print("Make sure you have installed the library with: pip install fast-readability")
+    demo_html_extraction()
+    demo_url_extraction()
+    demo_utility_methods()
+    
+    print("\n示例演示完成！")
 
 
 if __name__ == "__main__":
