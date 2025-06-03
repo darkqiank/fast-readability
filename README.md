@@ -30,13 +30,15 @@ pip install -e .
 
 ```python
 from fast_readability import Readability
+import requests
 
 # 创建提取器实例
 reader = Readability()
 
 # 从 URL 提取内容
 url = "https://example.com/article"
-result = reader.extract_from_url(url)
+html = requests.get(url).text
+result = reader.extract_from_url(html)
 
 print("标题:", result["title"])
 print("正文:", result["textContent"])
@@ -72,13 +74,11 @@ print("正文:", result["textContent"])
 ### 便捷函数
 
 ```python
-from fast_readability import extract_content, extract_from_url
+from fast_readability import extract_content
 
 # 直接从 HTML 提取
 result = extract_content(html)
 
-# 直接从 URL 提取
-result = extract_from_url("https://example.com/article")
 ```
 
 ## API 参考
@@ -108,14 +108,6 @@ result = extract_from_url("https://example.com/article")
 - `siteName`: 网站名称
 - `lang`: 语言
 
-#### `extract_from_url(url, headers=None, timeout=30, verify_ssl=True)`
-
-从 URL 提取内容。
-
-- `url` (str): 要提取的 URL
-- `headers` (dict, optional): 自定义请求头
-- `timeout` (int): 请求超时时间（秒）
-- `verify_ssl` (bool): 是否验证 SSL 证书
 
 #### `get_text_content(html)`
 
@@ -139,68 +131,6 @@ result = extract_from_url("https://example.com/article")
 
 从 URL 提取内容的便捷函数。
 
-## 使用示例
-
-### 处理不同类型的网站
-
-```python
-from fast_readability import Readability
-
-reader = Readability(debug=True)
-
-# 新闻网站
-news_result = reader.extract_from_url("https://news.example.com/article")
-
-# 博客文章
-blog_result = reader.extract_from_url("https://blog.example.com/post")
-
-# 技术文档
-doc_result = reader.extract_from_url("https://docs.example.com/guide")
-```
-
-### 自定义请求参数
-
-```python
-from fast_readability import Readability
-
-reader = Readability()
-
-# 自定义请求头
-headers = {
-    'User-Agent': 'MyBot/1.0',
-    'Accept-Language': 'zh-CN,zh;q=0.9'
-}
-
-result = reader.extract_from_url(
-    "https://example.com/article",
-    headers=headers,
-    timeout=60,
-    verify_ssl=False
-)
-```
-
-### 批量处理
-
-```python
-from fast_readability import Readability
-
-urls = [
-    "https://example1.com/article",
-    "https://example2.com/article",
-    "https://example3.com/article"
-]
-
-reader = Readability()
-
-for url in urls:
-    try:
-        result = reader.extract_from_url(url)
-        print(f"Title: {result['title']}")
-        print(f"Length: {result['length']} chars")
-        print("-" * 50)
-    except Exception as e:
-        print(f"Failed to extract {url}: {e}")
-```
 
 ## 依赖项
 

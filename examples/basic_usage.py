@@ -9,7 +9,7 @@ import os
 # 添加父目录到路径，以便导入包
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from fast_readability import Readability, extract_content, extract_from_url
+from fast_readability import Readability, extract_content
 
 
 def demo_html_extraction():
@@ -78,34 +78,6 @@ def demo_html_extraction():
     print(f"便捷函数提取的标题: {result2['title']}")
 
 
-def demo_url_extraction():
-    """演示从URL提取内容"""
-    print("\n=== URL提取示例 ===")
-    
-    # 这里使用一个公开的示例网站
-    test_urls = [
-        "https://httpbin.org/html",  # 简单的HTML测试页面
-    ]
-    
-    reader = Readability(debug=True)
-    
-    for url in test_urls:
-        try:
-            print(f"\n正在提取: {url}")
-            result = reader.extract_from_url(url, timeout=10)
-            
-            print(f"标题: {result['title']}")
-            print(f"内容长度: {result['length']} 字符")
-            if result['textContent']:
-                preview = result['textContent'][:200] + "..." if len(result['textContent']) > 200 else result['textContent']
-                print(f"内容预览: {preview}")
-            else:
-                print("未提取到内容")
-                
-        except Exception as e:
-            print(f"提取失败: {e}")
-
-
 def demo_utility_methods():
     """演示实用方法"""
     print("\n=== 实用方法示例 ===")
@@ -147,7 +119,6 @@ def main():
     print("=" * 50)
     
     demo_html_extraction()
-    demo_url_extraction()
     demo_utility_methods()
     
     print("\n示例演示完成！")

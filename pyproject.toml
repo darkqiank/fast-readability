@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fast-readability"
-version = "0.1.0"
+version = "0.0.1"
 description = "A fast HTML content extractor based on Mozilla's Readability.js"
 authors = [
     {name = "darkqiank", email = "darkqiank@gmail.com"}
@@ -31,10 +31,8 @@ classifiers = [
 ]
 keywords = ["readability", "html", "content-extraction", "web-scraping", "text-processing"]
 dependencies = [
-    "quickjs>=1.15.0",
+    "quickjs>=1.19.4",
     "beautifulsoup4>=4.9.0",
-    "requests>=2.25.0",
-    "urllib3>=1.26.0",
 ]
 
 [project.optional-dependencies]
@@ -48,7 +46,6 @@ dev = [
 test = [
     "pytest>=6.0",
     "pytest-cov>=3.0",
-    "requests-mock>=1.9.0",
 ]
 
 [project.urls]

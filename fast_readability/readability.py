@@ -5,14 +5,9 @@ Fast Readability - HTML content extractor
 import os
 import json
 import quickjs
-import requests
 from bs4 import BeautifulSoup
-import urllib3
 from typing import Optional, Dict, Any, Union
-from urllib.parse import urljoin
 
-# 禁用SSL警告
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class Readability:
@@ -28,7 +23,7 @@ class Readability:
         Initialize the Readability extractor.
         
         Args:
-            debug (bool): Enable debug mode for detailed logging
+            debug (bool): Enable debug mode for detailed loggings
         """
         self.debug = debug
         self._js_context = None
@@ -171,46 +166,6 @@ class Readability:
         """
         return self._extract_content(html)
     
-    def extract_from_url(self, url: str, headers: Optional[Dict[str, str]] = None, 
-                        timeout: int = 30, verify_ssl: bool = True) -> Dict[str, Any]:
-        """
-        Extract article content from a URL.
-        
-        Args:
-            url (str): URL to fetch and process
-            headers (Optional[Dict[str, str]]): Custom HTTP headers
-            timeout (int): Request timeout in seconds
-            verify_ssl (bool): Whether to verify SSL certificates
-            
-        Returns:
-            Dict[str, Any]: Dictionary containing extracted article data
-            
-        Raises:
-            requests.RequestException: If the HTTP request fails
-        """
-        default_headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        
-        if headers:
-            default_headers.update(headers)
-        
-        try:
-            response = requests.get(
-                url, 
-                headers=default_headers, 
-                timeout=timeout,
-                verify=verify_ssl
-            )
-            response.raise_for_status()
-            
-            html = response.text
-            return self._extract_content(html)
-            
-        except requests.RequestException as e:
-            if self.debug:
-                print(f"Failed to fetch URL {url}: {e}")
-            raise
     
     def get_text_content(self, html: str) -> str:
         """
@@ -267,19 +222,3 @@ def extract_content(html: str, debug: bool = False) -> Dict[str, Any]:
     """
     readability = Readability(debug=debug)
     return readability.extract_from_html(html)
-
-
-def extract_from_url(url: str, debug: bool = False, **kwargs) -> Dict[str, Any]:
-    """
-    Convenience function to extract content from URL.
-    
-    Args:
-        url (str): URL to fetch and process
-        debug (bool): Enable debug mode
-        **kwargs: Additional arguments passed to extract_from_url
-        
-    Returns:
-        Dict[str, Any]: Extracted article data
-    """
-    readability = Readability(debug=debug)
-    return readability.extract_from_url(url, **kwargs) 
